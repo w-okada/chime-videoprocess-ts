@@ -9,7 +9,7 @@ This is the demo of the Amazon chime SDK JS Video Processing APIs. The number of
 npm install
 ```
 ## generate configfile
-
+To access AWS chime server, you must create config file like this.
 ```
 $ cat > config.js
 module.exports = {
