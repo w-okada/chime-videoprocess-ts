@@ -62,7 +62,6 @@ export class VirtualBackground implements VideoFrameProcessor{
     }
 
     async process(buffers: VideoFrameBuffer[]){
-        console.log("process!")
         if(buffers.length == 0){
             return Promise.resolve(buffers);
         }

@@ -12,7 +12,7 @@ const config = require('./config');
 /* eslint-enable */
 
 let hostname = '0.0.0.0';
-let port = 8080;
+let port = 8888;
 let protocol = 'https';
 var ssl_server_key = 'server.key';
 var ssl_server_crt = 'server.crt';
