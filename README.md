@@ -9,7 +9,9 @@ This is the demo of the Amazon chime SDK JS Video Processing APIs. The number of
 npm install
 ```
 ## generate configfile
-To access AWS chime server, you must create config file like this.
+To access AWS chime server, you should set aws credential. 
+
+If you create config.js like this, the server will use it.
 ```
 $ cat > config.js
 module.exports = {
@@ -17,6 +19,10 @@ module.exports = {
     secretAccessKey:'WuN0xxxxxxx'
 }
 ```
+
+Otherewise, the server will use default credential which is defined in '~/.aws' or environmental variables.
+
+
 # Run
 
 ```

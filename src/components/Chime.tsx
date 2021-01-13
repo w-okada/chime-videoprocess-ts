@@ -132,8 +132,8 @@ export const Chime = () => {
     }
     return (
         <div>
-            meeting title: <input ref={titleRef} type="text" placeholder="meeting title" value="meeting1" />
-            username : <input ref={usernameRef} type="text" placeholder="user name" value="user1" />
+            meeting title: <input ref={titleRef} type="text" placeholder="meeting title" defaultValue="meeting1" />
+            username : <input ref={usernameRef} type="text" placeholder="user name" defaultValue="user1" />
             <button type="button" onClick={(e) => join()}>
                 join meeting
             </button>

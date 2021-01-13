@@ -7,7 +7,11 @@ const fs = require('fs');
 const url = require('url');
 const uuid = require('uuid');
 const AWS = require('aws-sdk');
-const config = require('./config');
+
+let config = undefined
+if(fs.existsSync('./config.js')){
+  config = require('./config');
+}
 
 /* eslint-enable */
 
@@ -21,7 +25,15 @@ let options = {
   cert: fs.readFileSync(ssl_server_crt)
 };
 
-const chime = new AWS.Chime({ region: 'us-east-1', credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey } } );
+let chime = undefined
+if(config){
+  console.log("[NOTE] USE Config Credential")
+  chime = new AWS.Chime({ region: 'us-east-1', credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey } } );
+}else{
+  console.log("[NOTE] USE Default Credential")
+  chime = new AWS.Chime({ region: 'us-east-1'} );
+}
+
 const alternateEndpoint = process.env.ENDPOINT;
 if (alternateEndpoint) {
   console.log('Using endpoint: ' + alternateEndpoint);
