@@ -22,6 +22,10 @@ module.exports = {
 
 Otherewise, the server will use default credential which is defined in '~/.aws' or environmental variables.
 
+## build
+```
+$ npm run build
+```
 
 # Run
 

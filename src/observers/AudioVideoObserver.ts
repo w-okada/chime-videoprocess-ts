@@ -24,17 +24,16 @@ class AudioVideoObserverImpl implements AudioVideoObserver{
     }
 
     videoTileDidUpdate(tileState: VideoTileState): void {
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tile did update")
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tile did update")
         const videoTiles = this.audioVideo.getAllVideoTiles()
 
         for(let i=0; i<videoTiles.length; i++){
             this.audioVideo.bindVideoElement(videoTiles[i].state().tileId!, this.videoElements[i])
-            console.log("video!!!!!!!!!!!!!!!!!", videoTiles[i].state().tileId!, this.videoElements[i])
+            // console.log("video!!!!!!!!!!!!!!!!!", videoTiles[i].state().tileId!, this.videoElements[i])
             this.videoElements[i].play()
         }
-        console.log("videotiledid", tileState)
-        console.log("videotiledid111", videoTiles, videoTiles.length)
-
+        // console.log("videotiledid", tileState)
+        // console.log("videotiledid111", videoTiles, videoTiles.length)
     }
 
     videoTileWasRemoved(tileId: number): void {
