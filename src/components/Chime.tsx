@@ -227,9 +227,9 @@ export const Chime = () => {
                         <MenuItem value="None">
                             <em>None</em>
                         </MenuItem>
-                        <MenuItem value="BodyPix">
+                        {/* <MenuItem value="BodyPix">
                             <em>BodyPix</em>
-                        </MenuItem>
+                        </MenuItem> */}
                         <MenuItem value="GoogleMeet">
                             <em>GoogleMeet</em>
                         </MenuItem>
