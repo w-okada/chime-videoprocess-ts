@@ -1,4 +1,4 @@
-import { ConsoleLogger, DefaultActiveSpeakerPolicy, DefaultDeviceController, DefaultMeetingSession, DefaultVideoTransformDevice, LogLevel, MeetingSessionConfiguration, VideoInputDevice, VideoTileState, VideoTransformDevice } from 'amazon-chime-sdk-js';
+import { ConsoleLogger, DefaultActiveSpeakerPolicy, DefaultDeviceController, DefaultMeetingSession, DefaultVideoTransformDevice, LogLevel, MeetingSessionConfiguration, VideoTileState, VideoTransformDevice } from 'amazon-chime-sdk-js';
 import React, { useState, ReactNode, useContext, useEffect } from 'react';
 import { DeviceChangeObserverImpl } from '../observers/DeviceChangeObserverImpl';
 import * as api from '../api/api'
@@ -39,8 +39,6 @@ export const MeetingStateProvider = ({ children }: Props) => {
     const [ newTileState, setNewTileState ] = useState(null as VideoTileState | null )
 
     //// Virtual Background
-    const [ backgroundImageForVBG, setBackgroundImageForVBG] = useState(null as HTMLCanvasElement | HTMLImageElement | null)
-    const [ backgroundColorForVBG, setBackgroundColorForVBG] = useState("#000000")
     const [ backgroundBlurLevelForVBG, setBackgroundBlurLevelForVBG] = useState(1)
     const [ virtualBackgroundProcessor, setVirtualBackgroundProcessor] = useState( null as VirtualBackground|null)
     if(virtualBackgroundProcessor === null){
@@ -70,9 +68,6 @@ export const MeetingStateProvider = ({ children }: Props) => {
         setBackgroundBlurLevelForVBG(backgroundBlurLevelForVBG+1)
     }
 
-    const setBackgroundForVirtualBackground = () =>{
-
-    }
 
     const joinMeeting = (meetingTitle:string, userName:string) => {
         console.log("joining!!!!")
