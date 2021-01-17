@@ -1,4 +1,4 @@
-import { AudioVideoObserver, MeetingSessionStatus, MeetingSessionStatusCode, VideoTileState, ClientMetricReport, MeetingSessionVideoAvailability, AudioVideoFacade } from "amazon-chime-sdk-js";
+import { AudioVideoObserver, MeetingSessionStatus, MeetingSessionStatusCode, VideoTileState, ClientMetricReport, MeetingSessionVideoAvailability } from "amazon-chime-sdk-js";
 
 class AudioVideoObserverTemplate implements AudioVideoObserver{
     // videoElements:HTMLVideoElement[]=[]

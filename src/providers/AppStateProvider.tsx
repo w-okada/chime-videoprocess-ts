@@ -1,13 +1,8 @@
 import React, { useState, ReactNode, useContext } from 'react';
-import { getDeviceLists } from '../utils';
 
 type Props = {
     children: ReactNode;
 };
-
-
-
-
 
 interface AppStateValue {
     audioInput: string|null,
