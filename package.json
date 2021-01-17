@@ -4,15 +4,19 @@
   "private": true,
   "dependencies": {
     "@dannadori/bodypix-worker-js": "^1.0.28",
-    "@testing-library/jest-dom": "^5.11.6",
-    "@testing-library/react": "^11.2.2",
+    "@dannadori/googlemeet-segmentation-worker-js": "^1.0.10",
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
+    "@tensorflow/tfjs": "^2.8.4",
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.0",
-    "@types/jest": "^26.0.19",
-    "@types/node": "^12.19.11",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^12.19.14",
     "@types/react": "^16.14.2",
     "@types/react-dom": "^16.9.10",
-    "amazon-chime-sdk-js": "^2.3.0",
-    "aws-sdk": "^2.817.0",
+    "amazon-chime-sdk-js": "^2.4.0",
+    "aws-sdk": "^2.828.0",
     "compression": "^1.7.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -44,5 +48,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/uuid": "^8.3.0"
   }
 }
