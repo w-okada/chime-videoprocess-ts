@@ -61,13 +61,13 @@ export class VirtualBackground implements VideoFrameProcessor {
     /////////////////////
     // WorkerManagers  //
     /////////////////////
-    // bodyPixConfig = (()=>{
+    // segConfig = (()=>{
     //     const c =generateBodyPixDefaultConfig()
     //     c.model=ModelConfigMobileNetV1_05
     //     c.processOnLocal = false
     //     return c
     // })()
-    // bodyPixParams = (() => {
+    // segParams = (() => {
     //     const p = generateDefaultBodyPixParams()
     //     // p.processWidth = 640
     //     // p.processHeight = 480
@@ -75,78 +75,32 @@ export class VirtualBackground implements VideoFrameProcessor {
     //     p.processHeight = 300
     //     return p
     // })()
-    // bodyPixManager = (() => {
-    //     const m = new BodypixWorkerManager()
-    //     m.init(this.bodyPixConfig)
-    //     return m
-    // })()
-
-    // googleMeetConfig = (()=>{
-    //     const c = generateGoogleMeetSegmentationDefaultConfig()
-    //     c.processOnLocal = true
-    //     return c
-    // })()
-    // googleMeetParams = (() => {
-    //     const p = generateDefaultGoogleMeetSegmentationParams()
-    //     p.processWidth = 128
-    //     p.processHeight = 128
-    //     // p.smoothingR = 1
-    //     // p.smoothingS = 0
-    //     p.jbfWidth = 256
-    //     p.jbfHeight = 256
-    //     // p.lightWrapping = true
-    //     return p
-    // })()
-    // googleMeetManager = (() => {
-    //     const m = new GoogleMeetSegmentationWorkerManager()
-    //     m.init(this.googleMeetConfig)
-    //     return m
-    // })()
-
-
-
-
-    
-    segConfig = (()=>{
-        const c =generateBodyPixDefaultConfig()
-        c.model=ModelConfigMobileNetV1_05
-        c.processOnLocal = false
-        return c
-    })()
-    segParams = (() => {
-        const p = generateDefaultBodyPixParams()
-        // p.processWidth = 640
-        // p.processHeight = 480
-        p.processWidth = 300
-        p.processHeight = 300
-        return p
-    })()
-    segManager = (() => {
-        const m = new BodypixWorkerManager()
-        m.init(this.segConfig)
-        return m
-    })()
-    // segConfig = (()=>{
-    //     const c = generateGoogleMeetSegmentationDefaultConfig()
-    //     c.processOnLocal = true
-    //     return c
-    // })()
-    // segParams = (() => {
-    //     const p = generateDefaultGoogleMeetSegmentationParams()
-    //     p.processWidth = 128
-    //     p.processHeight = 128
-    //     // p.smoothingR = 1
-    //     // p.smoothingS = 0
-    //     p.jbfWidth = 256
-    //     p.jbfHeight = 256
-    //     // p.lightWrapping = true
-    //     return p
-    // })()
     // segManager = (() => {
-    //     const m = new GoogleMeetSegmentationWorkerManager()
+    //     const m = new BodypixWorkerManager()
     //     m.init(this.segConfig)
     //     return m
     // })()
+    segConfig = (()=>{
+        const c = generateGoogleMeetSegmentationDefaultConfig()
+        c.processOnLocal = true
+        return c
+    })()
+    segParams = (() => {
+        const p = generateDefaultGoogleMeetSegmentationParams()
+        p.processWidth = 128
+        p.processHeight = 128
+        // p.smoothingR = 1
+        // p.smoothingS = 0
+        p.jbfWidth = 256
+        p.jbfHeight = 256
+        // p.lightWrapping = true
+        return p
+    })()
+    segManager = (() => {
+        const m = new GoogleMeetSegmentationWorkerManager()
+        m.init(this.segConfig)
+        return m
+    })()
 
 
     ////////////////////////////
