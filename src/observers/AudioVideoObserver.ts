@@ -1,12 +1,12 @@
-import { AudioVideoObserver, MeetingSessionStatus, MeetingSessionStatusCode, VideoTileState, ClientMetricReport, MeetingSessionVideoAvailability, AudioVideoFacade } from "amazon-chime-sdk-js";
+import { AudioVideoObserver, MeetingSessionStatus, MeetingSessionStatusCode, VideoTileState, ClientMetricReport, MeetingSessionVideoAvailability } from "amazon-chime-sdk-js";
 
-class AudioVideoObserverImpl implements AudioVideoObserver{
-    videoElements:HTMLVideoElement[]=[]
-    audioVideo:AudioVideoFacade
-    constructor(audioVideo:AudioVideoFacade, videoElements:HTMLVideoElement[]){
-        this.videoElements=videoElements
-        this.audioVideo = audioVideo
-    }
+class AudioVideoObserverTemplate implements AudioVideoObserver{
+    // videoElements:HTMLVideoElement[]=[]
+    // audioVideo:AudioVideoFacade
+    // constructor(audioVideo:AudioVideoFacade, videoElements:HTMLVideoElement[]){
+    //     this.videoElements=videoElements
+    //     this.audioVideo = audioVideo
+    // }
     
     audioVideoDidStartConnecting(reconnecting: boolean): void {
         console.log(`session connecting. reconnecting: ${reconnecting}`);
@@ -24,16 +24,16 @@ class AudioVideoObserverImpl implements AudioVideoObserver{
     }
 
     videoTileDidUpdate(tileState: VideoTileState): void {
-        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tile did update")
-        const videoTiles = this.audioVideo.getAllVideoTiles()
+        // // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tile did update")
+        // const videoTiles = this.audioVideo.getAllVideoTiles()
 
-        for(let i=0; i<videoTiles.length; i++){
-            this.audioVideo.bindVideoElement(videoTiles[i].state().tileId!, this.videoElements[i])
-            // console.log("video!!!!!!!!!!!!!!!!!", videoTiles[i].state().tileId!, this.videoElements[i])
-            this.videoElements[i].play()
-        }
-        // console.log("videotiledid", tileState)
-        // console.log("videotiledid111", videoTiles, videoTiles.length)
+        // for(let i=0; i<videoTiles.length; i++){
+        //     this.audioVideo.bindVideoElement(videoTiles[i].state().tileId!, this.videoElements[i])
+        //     // console.log("video!!!!!!!!!!!!!!!!!", videoTiles[i].state().tileId!, this.videoElements[i])
+        //     this.videoElements[i].play()
+        // }
+        // // console.log("videotiledid", tileState)
+        // // console.log("videotiledid111", videoTiles, videoTiles.length)
     }
 
     videoTileWasRemoved(tileId: number): void {
@@ -91,4 +91,4 @@ class AudioVideoObserverImpl implements AudioVideoObserver{
     }
 }
 
-export default AudioVideoObserverImpl
+export default AudioVideoObserverTemplate
