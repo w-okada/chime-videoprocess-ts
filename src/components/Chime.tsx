@@ -1,11 +1,51 @@
+import { Button, Container, createStyles, FormControl, Grid, GridList, GridListTile, GridListTileBar, IconButton, makeStyles, MenuItem, Select, Theme, Typography } from "@material-ui/core"
 import { ConsoleLogger, DefaultActiveSpeakerPolicy, DefaultDeviceController, DefaultMeetingSession, DefaultVideoTransformDevice, LogLevel, MeetingSessionConfiguration, VideoTransformDevice } from "amazon-chime-sdk-js"
-import { createRef, useEffect, useState } from "react"
-import { joinMeeting } from "../api/api"
-import { VirtualBackground } from "../frameProcessors/VirtualBackground"
-import AudioVideoObserver from "../observers/AudioVideoObserver"
-import { DeviceChangeObserverImpl } from "../observers/DeviceChangeObserverImpl"
-import { activeSpeakerDetectorSubscriber, attendeeIdPresenceSubscriber } from "../observers/subscriber"
-import { DefaultVideoTransformDeviceObserverImpl } from "../observers/TransformObserver"
+import React, { createRef, useEffect, useState } from "react"
+import { TextField } from "@material-ui/core"
+import { getDeviceLists } from "../utils"
+import { useDeviceState } from "../providers/DeviceStateProvider"
+import { InputLabel } from "@material-ui/core"
+import { FormHelperText } from "@material-ui/core"
+import { useAppState } from "../providers/AppStateProvider"
+import { v4 } from 'uuid'
+import { useMeetingState } from '../providers/MeetingProvider'
+import { VirtualBackgroundType } from "../frameProcessors/VirtualBackground"
+
+const MAX_VIDEO_NUM = 16
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+      overflow: 'hidden',
+      backgroundColor: theme.palette.background.paper,
+    },
+    gridList: {
+      flexWrap: 'nowrap',
+    //   Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+    transform: 'translateZ(0)',
+    },
+    title: {
+      color: theme.palette.primary.light,
+    },
+    titleBar: {
+      background:
+        'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+    },
+
+
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
+      },
+      selectEmpty: {
+        marginTop: theme.spacing(2),
+      },
+  }),
+);
+
 
 interface AppInfo{
     title?:string
@@ -13,152 +53,273 @@ interface AppInfo{
     meetingInfo?:any
     meetingSession?: DefaultMeetingSession
     transformDevice?: DefaultVideoTransformDevice
-    vbg?: VirtualBackground
 }
 
-
 export const Chime = () => {
-    const [appInfo, setAppInfo] = useState({}as AppInfo)
-    const titleRef = createRef<HTMLInputElement>()
-    const usernameRef = createRef<HTMLInputElement>()
+    const {audioInputList, videoInputList, audioOutputList} = useDeviceState()
+    const { setAudioInput, setVideoInput, setAudioOutput} = useAppState()
+    const { joinMeeting, meetingSession, newTileState, setVirtualBackgroundType} = useMeetingState()
+
+    const [inputMeetingTitle, setInputMeetingTitle] = useState("testmeeting")
+    const [inputUserName, setInputUserName] = useState("testuser" + v4())
+
     const fileInputRef = createRef<HTMLInputElement>()
     const bgFileInputRef = createRef<HTMLInputElement>()
     const videoElementRef = createRef<HTMLVideoElement>()
 
-    const join = () => {
-        appInfo['title'] = titleRef.current!.value
-        appInfo['userName'] = usernameRef.current!.value
-        joinMeeting(appInfo['title'], appInfo['userName']).then(meetingInfo => {
-            console.log(meetingInfo)
-            appInfo['meetingInfo'] = meetingInfo
-            const logger = new ConsoleLogger('MeetingLogs', LogLevel.OFF);
-            const deviceController = new DefaultDeviceController(logger);
-            const deviceChangeObserver = new DeviceChangeObserverImpl()
-            deviceController.addDeviceChangeObserver(deviceChangeObserver)
-            const configuration = new MeetingSessionConfiguration(meetingInfo.JoinInfo.Meeting, meetingInfo.JoinInfo.Attendee)
-            const meetingSession = new DefaultMeetingSession(configuration, logger, deviceController);
-            appInfo['meetingSession'] = meetingSession
-    
-            const audioVideoOserver = new AudioVideoObserver(meetingSession.audioVideo, [
-                document.getElementById("tile1") as HTMLVideoElement,
-                document.getElementById("tile2") as HTMLVideoElement,
-                document.getElementById("tile3") as HTMLVideoElement,
-                document.getElementById("tile4") as HTMLVideoElement,
-            ])
-            meetingSession.audioVideo.addObserver(audioVideoOserver)
-            meetingSession.audioVideo.realtimeSubscribeToAttendeeIdPresence(attendeeIdPresenceSubscriber)
-            meetingSession.audioVideo.subscribeToActiveSpeakerDetector(
-                new DefaultActiveSpeakerPolicy(),
-                activeSpeakerDetectorSubscriber,
-                scores => {
-                  //console.log("subscribeToActiveSpeakerDetector", scores)
-                },100
-            )
-            const inputAudioPromise  = meetingSession.audioVideo.listAudioInputDevices()
-            const inputVideoPromise  = meetingSession.audioVideo.listVideoInputDevices()
-            const outputAudioPromise = meetingSession.audioVideo.listAudioOutputDevices()
+    useEffect(()=>{
 
-            Promise.all([inputAudioPromise, inputVideoPromise, outputAudioPromise]).then(
-                ([inputAudioList, inputVideoList, outputAudioList])=>{
-                  console.log("Devices:::",inputAudioList, inputVideoList, outputAudioList)
-    
-                  const p1 = meetingSession.audioVideo.chooseAudioInputDevice(inputAudioList[0].deviceId)
-                  const p2 = meetingSession.audioVideo.chooseAudioOutputDevice(outputAudioList[0].deviceId)
-                  const vbg = new VirtualBackground()
-                  const transformDevice = new DefaultVideoTransformDevice(
-                    logger,
-                    inputVideoList[0].deviceId, 
-                    [vbg]
-                  );
-                  appInfo['transformDevice'] = transformDevice
-                  appInfo['vbg'] = vbg                  
-                  transformDevice.addObserver(new DefaultVideoTransformDeviceObserverImpl())
-                  const p3 = meetingSession.audioVideo.chooseVideoInputDevice(transformDevice as VideoTransformDevice)
-    
-                  Promise.all([p1,p2,p3]).then(()=>{
-                    const audioOutputElement = document.getElementById('audio-output') as HTMLAudioElement;              
-                    meetingSession.audioVideo.bindAudioElement(audioOutputElement);
-                    meetingSession.audioVideo.start()
-                    meetingSession.audioVideo.startLocalVideoTile()
-                    setAppInfo(appInfo)
-                  })
-                }
-              )
+        const video_tile_local = document.getElementById(`video-tile-local`) as HTMLVideoElement
+        const img_tile_local   = document.getElementById(`img-tile-local`) as HTMLImageElement
+
+        meetingSession?.audioVideo.getLocalVideoTile()?.bindVideoElement(video_tile_local)
+        if(video_tile_local){
+            if(meetingSession?.audioVideo.getLocalVideoTile()?.state().active){
+                video_tile_local.style.display = "block"
+                img_tile_local.style.display   = "none"
+            }else{
+                video_tile_local.style.display = "none"
+                img_tile_local.style.display   = "block"
+            }
+        }
+
+        meetingSession?.audioVideo.getAllRemoteVideoTiles().forEach((tile)=>{
+            if(tile.state().localTile) return
+            console.log("useEffect!", `video-tile-remote-${tile.id()}`)
+            const video_tile = document.getElementById(`video-tile-remote-${tile.id()}`) as HTMLVideoElement
+            tile.bindVideoElement(video_tile)
         })
+    })
+
+
+    const join = () => {
+        joinMeeting(inputMeetingTitle, inputUserName)
     }
 
-    const setBG = (path:string, fileType:string) => {
-        if(fileType.startsWith("image")){
-            appInfo['vbg']!.setBG(path)
+
+    ///////////////////////
+    /////// Device Change
+    //////////////////////
+    const onInputVideoChange = (e:any) =>{
+        if(e.target.value === "None"){
+            setVideoInput(null)
+        }else if(e.target.value === "File"){
+            fileInputRef.current!.click()
         }else{
-            console.log("not supported filetype", fileType)
+            setVideoInput(e.target.value)
         }
     }
-
-    const setMovie = (path:string, fileType:string) => {
+    const setInputVideoMovie = (path:string, fileType:string) => {
         if(fileType.startsWith("video")){
-            videoElementRef.current!.pause()
-            videoElementRef.current!.srcObject = null
-            videoElementRef.current!.src = path
-            videoElementRef.current!.currentTime=0
-            videoElementRef.current!.autoplay = true
-            videoElementRef.current!.play()
+            const v = document.getElementById("input-video-movie")! as HTMLVideoElement
+            v.pause()
+            v.srcObject = null
+            v.src = path
+            v.currentTime=0
+            v.autoplay = true
+            v.play()
 
-            videoElementRef.current!.onloadedmetadata = (e) =>{
+            v.onloadedmetadata = (e) =>{
                 // @ts-ignore
-                const mediaStream = videoElementRef.current!.captureStream() as MediaStream
-                appInfo['transformDevice'] = appInfo['transformDevice']!.chooseNewInnerDevice(mediaStream)
-                appInfo['meetingSession']!.audioVideo.chooseVideoInputDevice(appInfo['transformDevice']  as VideoTransformDevice).then(()=>{
-                    appInfo['meetingSession']!.audioVideo.startLocalVideoTile()
-                })
+                const mediaStream = v.captureStream() as MediaStream
+                setVideoInput(mediaStream)
+                // appInfo['transformDevice'] = appInfo['transformDevice']!.chooseNewInnerDevice(mediaStream)
+                // appInfo['meetingSession']!.audioVideo.chooseVideoInputDevice(appInfo['transformDevice']  as VideoTransformDevice).then(()=>{
+                //     appInfo['meetingSession']!.audioVideo.startLocalVideoTile()
+                // })
             }
         }else{
             console.log("not supported filetype", fileType)
         }
+
+    }
+    const onInputAudioChange = (e:any) =>{
+        const val = e.target.value === "None" ? null : e.target.value
+        setAudioInput(val)
+    }
+    const onOutputAudioChange = (e:any) =>{
+        const val = e.target.value === "None" ? null : e.target.value
+        setAudioOutput(val)
+    }
+    const setBackgroundImage = (path:string, fileType:string) =>{
+        if(fileType.startsWith("img")){
+
+        }else{
+            console.log("not supported filetype", fileType)
+        }
+    }
+    const onVirtualBackgroundTypeChange = (e:any) =>{
+        const type = e.target.value as VirtualBackgroundType
+        setVirtualBackgroundType(type)
     }
 
-    const setCamera = () => {
-        console.log("setMovie1")
-        appInfo['meetingSession']!.audioVideo.listVideoInputDevices().then(res=>{
-            appInfo['transformDevice'] = appInfo['transformDevice']!.chooseNewInnerDevice(res[0])
-            
-            appInfo['meetingSession']!.audioVideo.chooseVideoInputDevice(appInfo['transformDevice']  as VideoTransformDevice).then(()=>{
-                appInfo['meetingSession']!.audioVideo.startLocalVideoTile()
-            })
+    const classes = useStyles();
 
-        })
-        console.log("setMovie3",appInfo['transformDevice']!,appInfo['meetingSession']!)
-        
-    }
     return (
-        <div>
-            meeting title: <input ref={titleRef} type="text" placeholder="meeting title" defaultValue="meeting1" />
-            username : <input ref={usernameRef} type="text" placeholder="user name" defaultValue="user1" />
-            <button type="button" onClick={(e) => join()}>
-                join meeting
-            </button>
-            <button type="button" onClick={(e) => fileInputRef.current!.click()}>
-                movie
-            </button>
-            <button type="button" onClick={(e) => setCamera()}>
-                camera
-            </button>
-            <button type="button" onClick={(e) => bgFileInputRef.current!.click()}>
-                background
-            </button>
+        <div style={{position:"relative", width:"100%", height:"100%"}}>
 
+            {/* ************************************** */}
+            {/* *****   Control Header           ***** */}
+            {/* ************************************** */}
+            <div style={{position:"relative", alignItems:"flex-end", display:"flex", justifyContent:"center"}}>
+                <FormControl className={classes.formControl} style={{width:"10%"}}>
+                    <TextField onChange={(e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>{setInputMeetingTitle(e.target.value)}} value={inputMeetingTitle} label="meeting title" defaultValue="meeting1"/>
+                </FormControl>
+                <FormControl className={classes.formControl} style={{width:"10%"}}>
+                    <TextField onChange={(e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>{setInputUserName(e.target.value)}}     value={inputUserName} label="user name"     defaultValue="user1"/>
+                </FormControl>
+                <Button color="primary" onClick={join}>
+                    Join
+                </Button>
+
+                <FormControl className={classes.formControl} style={{width:"10%"}}>
+                    <InputLabel>Camera</InputLabel>
+                    <Select onChange={onInputVideoChange}>
+                        <MenuItem disabled value="Video">
+                            <em>Video</em>
+                        </MenuItem>
+                        <MenuItem value="None">
+                            <em>None</em>
+                        </MenuItem>
+                        {videoInputList?.map(dev=>{
+                            return <MenuItem value={dev.deviceId}>{dev.label}</MenuItem>
+                        })}
+                        <MenuItem value="File">
+                            <em>File</em>
+                        </MenuItem>
+                    </Select>
+                </FormControl>
+
+                {/* <FormControl className={classes.formControl} style={{width:"10%"}}>
+                    <InputLabel>Microhpone</InputLabel>
+                    <Select onChange={onInputAudioChange}>
+                        <MenuItem disabled value="Video">
+                            <em>Microphone</em>
+                        </MenuItem>
+                        <MenuItem value="None">
+                            <em>None</em>
+                        </MenuItem>
+                        {audioInputList?.map(dev=>{
+                            return <MenuItem value={dev.deviceId}>{dev.label}</MenuItem>
+                        })}
+                    </Select>
+                </FormControl>
+
+                <FormControl className={classes.formControl} style={{width:"10%"}}>
+                    <InputLabel>Speaker</InputLabel>
+                    <Select onChange={onOutputAudioChange}>
+                        <MenuItem disabled value="Video">
+                            <em>Speaker</em>
+                        </MenuItem>
+                        <MenuItem value="None">
+                            <em>None</em>
+                        </MenuItem>
+                        {audioOutputList?.map(dev=>{
+                            return <MenuItem value={dev.deviceId}>{dev.label}</MenuItem>
+                        })}
+                    </Select>
+                </FormControl> */}
+
+                <FormControl className={classes.formControl} style={{width:"10%"}}>
+                    <InputLabel>VirtualBackground</InputLabel>
+                    <Select onChange={onVirtualBackgroundTypeChange}>
+                        <MenuItem disabled value="Video">
+                            <em>VirtualBackground</em>
+                        </MenuItem>
+                        <MenuItem value="None">
+                            <em>None</em>
+                        </MenuItem>
+                        <MenuItem value="BodyPix">
+                            <em>BodyPix</em>
+                        </MenuItem>
+                        <MenuItem value="GoogleMeet">
+                            <em>GoogleMeet</em>
+                        </MenuItem>
+                    </Select>
+                </FormControl>
+
+                <Button color="primary" onClick={()=>{bgFileInputRef.current!.click()}} >
+                    Choose Image
+                </Button>
+
+            </div>
+
+
+            {/* ************************************** */}
+            {/* *****   Main Video               ***** */}
+            {/* ************************************** */}
+            {/* <div style={{position:"relative", alignItems:"flex-start", display:"flex", justifyContent:"center", width:"50%", height:"480px"}}>
+                <video controls width="640px" style={{position:"absolute", objectFit:"cover", width:"100%"}} />
+                <canvas width="640px" style={{position:"absolute", objectFit:"cover", width:"100%"}} />
+            </div> */}
+
+
+            {/* ************************************** */}
+            {/* *****   Video Tile               ***** */}
+            {/* ************************************** */}
+            <div className={classes.root} style={{width:"80%", margin :"0 auto", position:"static"}}  >
+                <Grid justify="center">
+                    <GridList className={classes.gridList} cols={2}>
+                        { 
+                            (()=>{
+                                const localVideoTile = 
+                                    <GridListTile key={`grid-tile-local`} style={{width:"40%", height:"100%"}}>
+                                        <div style={{width:"100%", height:"100%"}}>
+                                            <video id="video-tile-local" style={{width:"100%", height:"100%"}}/>
+                                            <img id="img-tile-local" src="./person.jpg" style={{width:"100%", height:"100%"}}/>
+                                        </div>
+                                    </GridListTile>
+                                
+                                const remoteVideoTiles = meetingSession?.audioVideo.getAllVideoTiles().map((tile)=>{
+                                    if(tile.state().localTile){
+                                        return undefined
+                                    }
+                                    return (
+                                        <GridListTile key={`grid-tile-remote-${tile.id()}`} style={{width:"40%", height:"100%"}}>
+                                            <video id={`video-tile-remote-${tile.id()}`} style={{width:"100%", height:"100%"}}/>
+                                            {/* <GridListTileBar
+                                                title={"name"}
+                                                classes={{
+                                                    root: classes.titleBar,
+                                                    title: classes.title,
+                                                }}
+                                                actionIcon={
+                                                    <IconButton aria-label={``}>
+                                                    <StarBorderIcon className={classes.title}/>
+                                                    </IconButton>
+                                                }
+                                            /> */}
+                                        </GridListTile>
+                                    )
+                                })
+                                remoteVideoTiles?.unshift(localVideoTile)
+                                return remoteVideoTiles?.filter(e=>e!==undefined)
+
+                            })()
+                        }
+
+                    </GridList>
+                </Grid>
+            </div>
+
+
+
+            {/* ************************************** */}
+            {/* *****   Hidden Elements          ***** */}
+            {/* ************************************** */}
             <input type="file" hidden ref={fileInputRef} onChange={(e: any) => {
-                    const path = URL.createObjectURL(e.target.files[0]);
-                    const fileType = e.target.files[0].type
-                    console.log("file",path,fileType)
-                    setMovie(path, fileType)
+                const path = URL.createObjectURL(e.target.files[0]);
+                const fileType = e.target.files[0].type
+                setInputVideoMovie(path, fileType)
             }} />
+            <video id="input-video-movie" loop hidden />
+
             <input type="file" hidden ref={bgFileInputRef} onChange={(e: any) => {
-                    const path = URL.createObjectURL(e.target.files[0]);
-                    const fileType = e.target.files[0].type
-                    console.log("file",path,fileType)
-                    setBG(path, fileType)
+                const path = URL.createObjectURL(e.target.files[0]);
+                const fileType = e.target.files[0].type
+                setBackgroundImage(path, fileType)
             }} />
+
             <video ref={videoElementRef} loop hidden />
             <audio id="audio-output" hidden></audio>
             <div id="video-container">
