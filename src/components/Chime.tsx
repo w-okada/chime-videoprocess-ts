@@ -1,11 +1,9 @@
-import { Button, Container, createStyles, FormControl, Grid, GridList, GridListTile, GridListTileBar, IconButton, makeStyles, MenuItem, Select, Theme, Typography } from "@material-ui/core"
-import { ConsoleLogger, DefaultActiveSpeakerPolicy, DefaultDeviceController, DefaultMeetingSession, DefaultVideoTransformDevice, LogLevel, MeetingSessionConfiguration, VideoTransformDevice } from "amazon-chime-sdk-js"
+import { Button, createStyles, FormControl, Grid, GridList, GridListTile, makeStyles, MenuItem, Select, Theme } from "@material-ui/core"
+import { DefaultMeetingSession, DefaultVideoTransformDevice } from "amazon-chime-sdk-js"
 import React, { createRef, useEffect, useState } from "react"
 import { TextField } from "@material-ui/core"
-import { getDeviceLists } from "../utils"
 import { useDeviceState } from "../providers/DeviceStateProvider"
 import { InputLabel } from "@material-ui/core"
-import { FormHelperText } from "@material-ui/core"
 import { useAppState } from "../providers/AppStateProvider"
 import { v4 } from 'uuid'
 import { useMeetingState } from '../providers/MeetingProvider'
@@ -266,7 +264,7 @@ export const Chime = () => {
                                     <GridListTile key={`grid-tile-local`} style={{width:"40%", height:"100%"}}>
                                         <div style={{width:"100%", height:"100%"}}>
                                             <video id="video-tile-local" style={{width:"100%", height:"100%"}}/>
-                                            <img id="img-tile-local" src="./person.jpg" style={{width:"100%", height:"100%"}}/>
+                                            <img id="img-tile-local" src="./person.jpg" alt="" style={{width:"100%", height:"100%"}}/>
                                         </div>
                                     </GridListTile>
                                 
