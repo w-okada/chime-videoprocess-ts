@@ -18,6 +18,7 @@ interface MeetingStateValue {
     newTileState: VideoTileState | null
 
     setVirtualBackgroundType: (val: VirtualBackgroundType) => void
+    setVirtualBackgroundImageImage: (path: string) => void
 }
 
 
@@ -64,8 +65,10 @@ export const MeetingStateProvider = ({ children }: Props) => {
 
     const setVirtualBackgroundType = (val:VirtualBackgroundType) =>{
         virtualBackgroundProcessor?.setVirtualBackgroundType(val)
-        console.log("BACKGROINDBLUR:::", backgroundBlurLevelForVBG)
-        setBackgroundBlurLevelForVBG(backgroundBlurLevelForVBG+1)
+    }
+
+    const setVirtualBackgroundImageImage = (path:string) =>{
+        virtualBackgroundProcessor?.setBackgroundImage(path)
     }
 
 
@@ -128,6 +131,7 @@ export const MeetingStateProvider = ({ children }: Props) => {
         newTileState,
 
         setVirtualBackgroundType,
+        setVirtualBackgroundImageImage,
     }
 
     return (
