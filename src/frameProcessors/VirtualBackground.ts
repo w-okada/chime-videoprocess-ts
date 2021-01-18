@@ -89,11 +89,11 @@ export class VirtualBackground implements VideoFrameProcessor {
         const p = generateDefaultGoogleMeetSegmentationParams()
         p.processWidth = 128
         p.processHeight = 128
-        // p.smoothingR = 1
-        // p.smoothingS = 0
+        p.smoothingR = 1
+        p.smoothingS = 0
         p.jbfWidth = 256
         p.jbfHeight = 256
-        // p.lightWrapping = true
+        p.lightWrapping = true
         return p
     })()
     segManager = (() => {
