@@ -56,7 +56,7 @@ interface AppInfo{
 export const Chime = () => {
     const {audioInputList, videoInputList, audioOutputList} = useDeviceState()
     const { setAudioInput, setVideoInput, setAudioOutput} = useAppState()
-    const { joinMeeting, meetingSession, newTileState, setVirtualBackgroundType} = useMeetingState()
+    const { joinMeeting, meetingSession, newTileState, setVirtualBackgroundType, setVirtualBackgroundImageImage} = useMeetingState()
 
     const [inputMeetingTitle, setInputMeetingTitle] = useState("testmeeting")
     const [inputUserName, setInputUserName] = useState("testuser" + v4())
@@ -140,8 +140,8 @@ export const Chime = () => {
         setAudioOutput(val)
     }
     const setBackgroundImage = (path:string, fileType:string) =>{
-        if(fileType.startsWith("img")){
-
+        if(fileType.startsWith("image")){
+            setVirtualBackgroundImageImage(path)
         }else{
             console.log("not supported filetype", fileType)
         }
