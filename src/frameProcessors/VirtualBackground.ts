@@ -61,31 +61,29 @@ export class VirtualBackground implements VideoFrameProcessor {
     /////////////////////
     // WorkerManagers  //
     /////////////////////
-    // segConfig = (()=>{
-    //     const c =generateBodyPixDefaultConfig()
-    //     c.model=ModelConfigMobileNetV1_05
-    //     c.processOnLocal = false
-    //     return c
-    // })()
-    // segParams = (() => {
-    //     const p = generateDefaultBodyPixParams()
-    //     // p.processWidth = 640
-    //     // p.processHeight = 480
-    //     p.processWidth = 300
-    //     p.processHeight = 300
-    //     return p
-    // })()
-    // segManager = (() => {
-    //     const m = new BodypixWorkerManager()
-    //     m.init(this.segConfig)
-    //     return m
-    // })()
-    segConfig = (()=>{
-        const c = generateGoogleMeetSegmentationDefaultConfig()
-        c.processOnLocal = true
+    bodyPixConfig = (()=>{
+        const c =generateBodyPixDefaultConfig()
+        c.model=ModelConfigMobileNetV1_05
+        c.processOnLocal = false
         return c
     })()
-    segParams = (() => {
+    bodyPixParams = (() => {
+        const p = generateDefaultBodyPixParams()
+        p.processWidth = 640
+        p.processHeight = 480
+        return p
+    })()
+    bodyPixManager = (() => {
+        const m = new BodypixWorkerManager()
+        m.init(this.bodyPixConfig)
+        return m
+    })()
+    googlemeetConfig = (()=>{
+        const c = generateGoogleMeetSegmentationDefaultConfig()
+        c.processOnLocal = false
+        return c
+    })()
+    googlemeetParams = (() => {
         const p = generateDefaultGoogleMeetSegmentationParams()
         p.processWidth = 128
         p.processHeight = 128
@@ -96,9 +94,9 @@ export class VirtualBackground implements VideoFrameProcessor {
         p.lightWrapping = true
         return p
     })()
-    segManager = (() => {
+    googlemeetManager = (() => {
         const m = new GoogleMeetSegmentationWorkerManager()
-        m.init(this.segConfig)
+        m.init(this.googlemeetConfig)
         return m
     })()
 
@@ -168,11 +166,11 @@ export class VirtualBackground implements VideoFrameProcessor {
                 switch (this.config.type) {
                     case "BodyPix":
                         // result = await this.bodyPixManager!.predict(canvas, this.bodyPixParams!)
-                        result = await this.segManager!.predict(canvas, this.segParams!)
+                        result = await this.bodyPixManager!.predict(canvas, this.bodyPixParams!)
                         break
                     case "GoogleMeet":
                         // result = await this.googleMeetManager!.predict(canvas, this.googleMeetParams!)
-                        result = await this.segManager!.predict(canvas, this.segParams!)
+                        result = await this.googlemeetManager!.predict(canvas, this.googlemeetParams!)
                         break
                     default:
                         result = null
@@ -288,30 +286,30 @@ export class VirtualBackground implements VideoFrameProcessor {
             
 
         
-            // // light wrapping
-            // this.lightWrapCanvas.width = prediction[0].length
-            // this.lightWrapCanvas.height = prediction.length
-            // const lightWrapImageData = this.lightWrapCanvas.getContext("2d")!.getImageData(0, 0, this.lightWrapCanvas.width, this.lightWrapCanvas.height)
-            // const lightWrapdata = lightWrapImageData.data
+            // light wrapping
+            this.lightWrapCanvas.width = prediction[0].length
+            this.lightWrapCanvas.height = prediction.length
+            const lightWrapImageData = this.lightWrapCanvas.getContext("2d")!.getImageData(0, 0, this.lightWrapCanvas.width, this.lightWrapCanvas.height)
+            const lightWrapdata = lightWrapImageData.data
 
-            // for (let rowIndex = 0; rowIndex < this.lightWrapCanvas.height; rowIndex++) {
-            //     for (let colIndex = 0; colIndex < this.lightWrapCanvas.width; colIndex++) {
-            //         const pix_offset = ((rowIndex * this.lightWrapCanvas.width) + colIndex) * 4
-            //         if (prediction[rowIndex][colIndex] > 140) {
-            //             lightWrapdata[pix_offset + 0] = 0
-            //             lightWrapdata[pix_offset + 1] = 0
-            //             lightWrapdata[pix_offset + 2] = 0
-            //             lightWrapdata[pix_offset + 3] = 0
-            //         } else {
-            //             lightWrapdata[pix_offset + 0] = 255
-            //             lightWrapdata[pix_offset + 1] = 255
-            //             lightWrapdata[pix_offset + 2] = 255
-            //             lightWrapdata[pix_offset + 3] = 255
-            //         }
-            //     }
-            // }
-            // const lightWrapimageDataTransparent = new ImageData(lightWrapdata, this.lightWrapCanvas.width, this.lightWrapCanvas.height);
-            // this.lightWrapCanvas.getContext("2d")!.putImageData(lightWrapimageDataTransparent, 0, 0)
+            for (let rowIndex = 0; rowIndex < this.lightWrapCanvas.height; rowIndex++) {
+                for (let colIndex = 0; colIndex < this.lightWrapCanvas.width; colIndex++) {
+                    const pix_offset = ((rowIndex * this.lightWrapCanvas.width) + colIndex) * 4
+                    if (prediction[rowIndex][colIndex] > 140) {
+                        lightWrapdata[pix_offset + 0] = 0
+                        lightWrapdata[pix_offset + 1] = 0
+                        lightWrapdata[pix_offset + 2] = 0
+                        lightWrapdata[pix_offset + 3] = 0
+                    } else {
+                        lightWrapdata[pix_offset + 0] = 255
+                        lightWrapdata[pix_offset + 1] = 255
+                        lightWrapdata[pix_offset + 2] = 255
+                        lightWrapdata[pix_offset + 3] = 255
+                    }
+                }
+            }
+            const lightWrapimageDataTransparent = new ImageData(lightWrapdata, this.lightWrapCanvas.width, this.lightWrapCanvas.height);
+            this.lightWrapCanvas.getContext("2d")!.putImageData(lightWrapimageDataTransparent, 0, 0)
 
             // Background
             // (3) merge Front into Bacground
