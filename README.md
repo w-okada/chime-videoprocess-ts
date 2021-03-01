@@ -7,7 +7,13 @@ This is the demo of the Amazon chime SDK JS Video Processing APIs. The number of
 ## install dependency
 ```
 npm install
+
+mkdir public/googlemeet-segmentation_128
+curl https://flect-lab-web.s3-us-west-2.amazonaws.com/googlemeet/googlemeet-segmentation_128_32/model.json > public/googlemeet-segmentation_128/model.json
+curl https://flect-lab-web.s3-us-west-2.amazonaws.com/googlemeet/googlemeet-segmentation_128_32/group1-shard1of1.bin > public/googlemeet-segmentation_128/group1-shard1of1.bin
+
 ```
+
 ## generate configfile
 To access AWS chime server, you should set aws credential. 
 

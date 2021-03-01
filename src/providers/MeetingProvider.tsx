@@ -59,6 +59,12 @@ export const MeetingStateProvider = ({ children }: Props) => {
                 meetingSession.audioVideo.chooseVideoInputDevice(videoProcessor).then(()=>{
                     meetingSession.audioVideo.startLocalVideoTile()
                 })
+
+                ////// こちらだとリモート側がブラックアプトする。コーデックの問題か？
+                // console.log("videoInput!!!", videoInput)
+                // meetingSession.audioVideo.chooseVideoInputDevice(videoInput).then(()=>{
+                //     meetingSession.audioVideo.startLocalVideoTile()
+                // })
             }
         }
     },[videoInput])

@@ -25,3 +25,5 @@ yarn-error.log*
 config.js
 .eslintcache
 mod_build.sh
+
+public/googlemeet-segmentation_128
